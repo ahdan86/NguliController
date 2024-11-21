@@ -16,6 +16,7 @@ struct GamepadInput: Codable {
     var leftThumbstickY: Float
     var buttonAPressed: Bool
     var buttonBPressed: Bool
+    var buttonYPressed: Bool
 }
 
 class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate {
@@ -64,7 +65,7 @@ class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCN
     
     func setupVirtualController() {
         let configuration = GCVirtualController.Configuration()
-        configuration.elements = [GCInputLeftThumbstick, GCInputButtonA, GCInputButtonB]
+        configuration.elements = [GCInputLeftThumbstick, GCInputButtonA, GCInputButtonB, GCInputButtonY]
         
         virtualController = GCVirtualController(configuration: configuration)
         virtualController?.connect()
@@ -84,7 +85,8 @@ class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCN
             leftThumbstickX: gamepad.leftThumbstick.xAxis.value,
             leftThumbstickY: gamepad.leftThumbstick.yAxis.value,
             buttonAPressed: gamepad.buttonA.isPressed,
-            buttonBPressed: gamepad.buttonB.isPressed
+            buttonBPressed: gamepad.buttonB.isPressed,
+            buttonYPressed: gamepad.buttonY.isPressed
         )
         
         if let data = try? JSONEncoder().encode(inputState) {
