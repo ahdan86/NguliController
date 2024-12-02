@@ -7,5 +7,10 @@
 		<string>_game-controller._tcp</string>
 		<string>_game-controller._udp</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BalooBhaijaan2-VariableFont_wght.ttf</string>
+		<string>Tiny5-Regular.ttf</string>
+	</array>
 </dict>
 </plist>

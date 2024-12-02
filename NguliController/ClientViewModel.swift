@@ -23,13 +23,20 @@ class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCN
     
     static let shared = MultipeerClientManager()
     
-    @Published var isConnected = false
+    @Published var isConnected = false {
+        didSet {
+            isConnecting = false
+        }
+    }
+    @Published var isConnecting = false
     @Published var enteredCode: String = ""
     
     private var session: MCSession!
     private var peerID: MCPeerID!
     private var browser: MCNearbyServiceBrowser!
     private var virtualController: GCVirtualController?
+    
+    private var connectionTimeoutWorkItem: DispatchWorkItem?
     
     override init() {
         super.init()
@@ -41,10 +48,30 @@ class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCN
     // MARK: - Connection Methods
     
     func startConnect(code: String) {
+        isConnecting = true
         startBrowsing(code: code)
+
+        // Cancel any previous timeout
+        connectionTimeoutWorkItem?.cancel()
+        
+        // Create a new timeout work item
+        connectionTimeoutWorkItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            if !self.isConnected {
+                self.isConnecting = false
+                self.stopBrowsing()
+                print("Connection attempt timed out")
+            }
+        }
+        
+        // Schedule the timeout work item to execute after 5 seconds
+        if let workItem = connectionTimeoutWorkItem {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: workItem)
+        }
     }
     
     func disconnect() {
+        connectionTimeoutWorkItem?.cancel()
         session.disconnect()
         deactivateVirtualController()
         enteredCode = ""
@@ -117,9 +144,12 @@ class MultipeerClientManager: NSObject, ObservableObject, MCSessionDelegate, MCN
         DispatchQueue.main.async {
             self.isConnected = (state == .connected)
             print("Connection state changed: \(state.rawValue)")
+            
             if state == .connected {
+                // Cancel the timeout if connected
+                self.connectionTimeoutWorkItem?.cancel()
                 self.setupVirtualController()
-            } else {
+            } else if state == .notConnected {
                 self.deactivateVirtualController()
             }
         }
