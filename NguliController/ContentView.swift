@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = MultipeerClientManager()
@@ -19,7 +18,6 @@ struct ContentView: View {
             ZStack {
                 Image(.background)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
 
                 VStack(alignment: .center, spacing: 20) {
@@ -99,7 +97,7 @@ struct ContentView: View {
                 .padding(.bottom, keyboardObserver.keyboardHeight)
                 .animation(.easeInOut, value: keyboardObserver.keyboardHeight)
             }
-        }
+        }.ignoresSafeArea()
     }
 }
 
